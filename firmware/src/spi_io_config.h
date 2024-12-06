@@ -14,6 +14,8 @@
    limitations under the License.
 */
 
+#include <Arduino.h>
+
 #ifndef IO_CONFIG_H
 #define IO_CONFIG_H
 
@@ -64,7 +66,8 @@
   // to the ESP32. You can otherwise hard-wire the output enable pins to always be enabled.
   // #define OUTPUT_ENABLE_PIN (27)
 
-  #define PIN_NUM_MISO 39
+  #define PIN_NUM_MISO 23 //Changed for pull up
+
   #define PIN_NUM_MOSI 32
   #define PIN_NUM_CLK  33
 
@@ -84,6 +87,7 @@
 
   spi_transaction_t tx_transaction;
   spi_transaction_t rx_transaction;
+
 
 
 #endif
@@ -132,6 +136,7 @@ static const uint8_t MOTOR_OFFSET[] = {0, 0, 1, 2, 3, 3};
 #endif
 
 inline void initialize_modules() {
+
   for (uint8_t i = 0; i < NUM_MODULES; i++) {
     // Create SplitflapModules in a statically allocated buffer using placement new
 #ifdef CHAINLINK
@@ -163,7 +168,7 @@ inline void initialize_modules() {
 #ifdef ESP32
 
   esp_err_t ret;
-
+   pinMode(PIN_NUM_MISO, INPUT_PULLUP); 
   //Initialize the SPI bus
   spi_bus_config_t tx_bus_config = {
       .mosi_io_num = PIN_NUM_MOSI,
@@ -303,6 +308,7 @@ bool chainlink_test_startup_loopback(bool results[NUM_LOOPBACKS]) {
     motor_sensor_io();
     motor_sensor_io();
 
+
     for (uint8_t i = 0; i < NUM_LOOPBACKS; i++) {
       results[i] = ((sensor_buffer[chainlink_loopbackSensorByte(i)] & chainlink_loopbackSensorBitMask(i))) == 0;
       success &= results[i];
@@ -340,6 +346,8 @@ bool chainlink_validate_loopback(uint8_t loop_out_index, bool results[NUM_LOOPBA
 
 bool chainlink_test_all_loopbacks(bool loopback_result[NUM_LOOPBACKS][NUM_LOOPBACKS], bool loopback_off_result[NUM_LOOPBACKS]) {
     bool loopback_success = true;
+
+
 
     // Turn one loopback bit on at a time and make sure only that loopback bit is set
     for (uint8_t loop_out_index = 0; loop_out_index < NUM_LOOPBACKS; loop_out_index++) {

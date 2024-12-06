@@ -50,6 +50,10 @@
 #define UNEXPECTED_HOME_START_STEP UNEXPECTED_HOME_START_BUFFER_STEPS  // Start of range where a home sensor blip is unexpected
 #define UNEXPECTED_HOME_END_STEP (STEPS_PER_REVOLUTION - HOME_ERROR_MARGIN_STEPS)  // End of range where a home sensor blip is unexpected
 
+#define PRE_HOME_BUFFER_STEPS (_ROUGH_STEPS_PER_FLAP * 2)  // 2 flaps of buffer before home
+#define UNEXPECTED_HOME_PRE_START (STEPS_PER_REVOLUTION - PRE_HOME_BUFFER_STEPS)  // Start of pre-home buffer zone
+
+
 // Expected home position step plus some margin of error. If we get to this step without having seen a home
 // sensor blip, something is wrong and we need to recalibrate.
 #define MISSED_HOME_STEP HOME_ERROR_MARGIN_STEPS
@@ -278,58 +282,54 @@ inline void SplitflapModule::Update() {
 
         uint8_t target_accel_step;
 
-        if (state == NORMAL) {
-            bool reset_to_home = false;
-#if HOME_CALIBRATION_ENABLED
-            bool found_home = CheckSensor();
-            if (home_state == IGNORE) {
-#if VERBOSE_LOGGING
-                if (found_home) {
-                    Serial.print("VERBOSE: Ignoring home");
-                }
-#endif
-                if (current_step == UNEXPECTED_HOME_START_STEP) {
-                    home_state = UNEXPECTED;
-                }
-            } else if (home_state == UNEXPECTED) {
-                if (found_home) {
-                  count_unexpected_home++;
-#if VERBOSE_LOGGING
-                    Serial.print("VERBOSE: Unexpected home! At ");
-                    Serial.print(current_step);
-                    Serial.print(". Unexpected range ");
-                    Serial.print(UNEXPECTED_HOME_START_STEP);
-                    Serial.print('-');
-                    Serial.print(UNEXPECTED_HOME_END_STEP);
-                    Serial.print("; missed at ");
-                    Serial.print(MISSED_HOME_STEP);
-                    Serial.print(".\n");
-#endif
-                    reset_to_home = true;
-                } else if (current_step == UNEXPECTED_HOME_END_STEP) {
-                    home_state = EXPECTED;
-                }
-            } else if (home_state == EXPECTED) {
-                if (FAKE_HOME_SENSOR || found_home) {
-#if VERBOSE_LOGGING
-                    Serial.print("VERBOSE: Found expected home.");
-#endif
-                    home_state = IGNORE;
-                } else if (current_step == MISSED_HOME_STEP) {
-                  count_missed_home++;
-#if VERBOSE_LOGGING
-                    Serial.print("VERBOSE: Missed expected home! At ");
-                    Serial.print(current_step);
-                    Serial.print(". Expected between ");
-                    Serial.print(UNEXPECTED_HOME_END_STEP);
-                    Serial.print(" and ");
-                    Serial.print(MISSED_HOME_STEP);
-                    Serial.print(".\n");
-#endif
-                    reset_to_home = true;
-                }
+if (state == NORMAL) {
+    bool reset_to_home = false;
+    bool found_home = CheckSensor();
+    
+    if (home_state == IGNORE) {
+        #if VERBOSE_LOGGING
+        if (found_home) {
+            Serial.print("VERBOSE: Ignoring home");
+        }
+        #endif
+        if (current_step == UNEXPECTED_HOME_START_STEP) {
+            home_state = UNEXPECTED;
+        }
+    } else if (home_state == UNEXPECTED) {
+        // Add pre-home buffer zone check
+        if (found_home) {
+            // Only count as unexpected if we're not in either buffer zone
+            if (current_step >= UNEXPECTED_HOME_START_STEP && 
+                current_step <= UNEXPECTED_HOME_PRE_START) {
+                count_unexpected_home++;
+                #if VERBOSE_LOGGING
+                Serial.print("VERBOSE: Unexpected home! At ");
+                Serial.print(current_step);
+                Serial.print(". Unexpected range ");
+                Serial.print(UNEXPECTED_HOME_START_STEP);
+                Serial.print('-');
+                Serial.print(UNEXPECTED_HOME_PRE_START);
+                Serial.print(".\n");
+                #endif
+                reset_to_home = true;
             }
-#endif
+            #if VERBOSE_LOGGING
+            else {
+                Serial.print("VERBOSE: Home detected in buffer zone, ignoring");
+            }
+            #endif
+        } else if (current_step == UNEXPECTED_HOME_END_STEP) {
+            home_state = EXPECTED;
+        }
+    } else if (home_state == EXPECTED) {
+        // Rest of the existing EXPECTED state code remains the same
+        if (FAKE_HOME_SENSOR || found_home) {
+            home_state = IGNORE;
+        } else if (current_step == MISSED_HOME_STEP) {
+            count_missed_home++;
+            reset_to_home = true;
+        }
+    }
 
             if (reset_to_home) {
                 FindAndRecalibrateHome();

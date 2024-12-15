@@ -2,10 +2,30 @@ import React, {ReactNode, SyntheticEvent, useCallback, useEffect, useRef, useSta
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import {PB} from 'splitflapjs-proto'
-import {Alert, AlertTitle, AppBar, Button, Card, CardContent, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Link, Toolbar, Tooltip,} from '@mui/material'
+import {
+    Alert,
+    AlertTitle,
+    AppBar,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControlLabel,
+    Link,
+    Switch,
+    TextField,
+    Toolbar,
+    Tooltip,
+} from '@mui/material'
 import {NoUndefinedField} from './util'
 import {SplitflapWebSerial} from 'splitflapjs-webserial'
-import { applyResetModule, applySetFlaps } from 'splitflapjs-core/dist/util'
+import {applyResetModule, applySetFlaps} from 'splitflapjs-core/dist/util'
 
 const LEGACY_FLAPS = [
     ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
@@ -37,10 +57,10 @@ type LogDisplay = {
     body: string,
 }
 
-const renderFlapCharacter = (flapCharacter: string): ReactNode => 
+const renderFlapCharacter = (flapCharacter: string): ReactNode =>
     FLAP_COLOR_BLOCKS[flapCharacter] !== undefined ? (
-            <span style={{color: FLAP_COLOR_BLOCKS[flapCharacter]}}>█</span>
-        ) : ( String(flapCharacter).replace(' ', "\u00A0") )
+        <span style={{color: FLAP_COLOR_BLOCKS[flapCharacter]}}>█</span>
+    ) : (String(flapCharacter).replace(' ', "\u00A0"))
 
 export type AppProps = object
 export const App: React.FC<AppProps> = () => {
@@ -66,11 +86,11 @@ export const App: React.FC<AppProps> = () => {
     }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
-      const upper = value.toUpperCase()
-      if (legalString(upper)) {
-        setInputValue({val: upper, user: true});
-      }
+        const {value} = event.target;
+        const upper = value.toUpperCase()
+        if (legalString(upper)) {
+            setInputValue({val: upper, user: true});
+        }
     };
     const [splitflapConfig, setSplitflapConfig] = useState<Config>(defaultConfig)
     useEffect(() => {
@@ -198,94 +218,98 @@ export const App: React.FC<AppProps> = () => {
 
     return (
         <>
-        <AppBar position="relative" color="default">
-          <Toolbar>
-            <Typography variant="h6" color="inherit" noWrap>
-              Splitflap Web Serial Demo
-            </Typography>
-          </Toolbar>
-        </AppBar>
+            <AppBar position="relative" color="default">
+                <Toolbar>
+                    <Typography variant="h6" color="inherit" noWrap>
+                        Splitflap Web Serial Demo
+                    </Typography>
+                </Toolbar>
+            </AppBar>
             <Container component="main" maxWidth="lg">
-        <Card sx={{margin: '32px'}}>
-            <CardContent>
-                    {splitflap !== null ? (
-                        <>
-                            {showOutdatedFirmwareMessage ? (
-                                <Alert
-                                severity="info"
-                                action={
-                                    <Button color="inherit" size="small" onClick={() => {
-                                        setShowOutdatedFirmwareMessage(false)
-                                    }}>
-                                    Dismiss
-                                    </Button>
-                                }
-                                >
-                                <AlertTitle>Outdated firmware</AlertTitle>
-                                The connected splitflap device is running outdated firmware; some functionality may be missing as a result. Please build and upload the latest firmware to the ESP32.
-                                </Alert>
-                            ) : null}
-                            {unsavedCalibration ? (
-                                <Alert
-                                severity="warning"
-                                action={
-                                    <Button color="inherit" size="small" onClick={() => {
-                                        setLogDisplay({
-                                            lastN: 20,
-                                            after: new Date(),
-                                            title: "Saving calibration...",
-                                            body: "Check the logs to confirm the calibration has saved successfully:"
-                                        })
-                                        setTimeout(() => splitflap.saveAllOffsets(), 200)
-                                        setUnsavedCalibration(false)
-                                    }}>
-                                    SAVE CALIBRATION
-                                    </Button>
-                                }
-                                >
-                                <AlertTitle>Unsaved calibration</AlertTitle>
-                                Module calibration has been modified but has not been saved yet. It will be lost when the ESP32 is restarted.
-                                </Alert>
-                            ) : null}
-                            <Typography variant="h4" color="inherit">
-                                Current state
-                            </Typography>
-                            <div style={{
-                            }}>
-                            {
-                                splitflapState.modules.map((module, i) => {
-                                    return (<SplitflapModuleDisplay
-                                            i={i}
-                                            module={module}
-                                            flapCharacterSet={flapCharacterSet}
-                                            charWidth={charWidth}
-                                            setSplitflapConfig={setSplitflapConfig}
-                                            increaseOffsetTenth={() => splitflap?.offsetIncrementTenth(i)}
-                                            increaseOffsetHalf={() => splitflap?.offsetIncrementHalf(i)}
-                                            goToFlap={(flapIndex) => {
-                                                const update: (number | null)[] = Array(i + 1).fill(null)
-                                                update[i] = flapIndex
-                                                setSplitflapConfig((curConfig) => {
-                                                    return PB.SplitflapConfig.toObject(applySetFlaps(PB.SplitflapConfig.create(curConfig), update), {
-                                                        defaults: true,
-                                                    }) as NoUndefinedField<PB.ISplitflapConfig>
+                <Card sx={{margin: '32px'}}>
+                    <CardContent>
+                        {splitflap !== null ? (
+                            <>
+                                {showOutdatedFirmwareMessage ? (
+                                    <Alert
+                                        severity="info"
+                                        action={
+                                            <Button color="inherit" size="small" onClick={() => {
+                                                setShowOutdatedFirmwareMessage(false)
+                                            }}>
+                                                Dismiss
+                                            </Button>
+                                        }
+                                    >
+                                        <AlertTitle>Outdated firmware!</AlertTitle>
+                                        The connected splitflap device is running outdated firmware; some functionality
+                                        may be missing as a result. Please build and upload the latest firmware to the
+                                        ESP32.
+                                    </Alert>
+                                ) : null}
+                                {unsavedCalibration ? (
+                                    <Alert
+                                        severity="warning"
+                                        action={
+                                            <Button color="inherit" size="small" onClick={() => {
+                                                setLogDisplay({
+                                                    lastN: 20,
+                                                    after: new Date(),
+                                                    title: "Saving calibration...",
+                                                    body: "Check the logs to confirm the calibration has saved successfully:"
                                                 })
-                                            }}
-                                            setOffsetToCurrentStep={
-                                                () => {
-                                                    splitflap?.offsetSetToCurrentStep(i)
-                                                    setUnsavedCalibration(true);
+                                                setTimeout(() => splitflap.saveAllOffsets(), 200)
+                                                setUnsavedCalibration(false)
+                                            }}>
+                                                SAVE CALIBRATION
+                                            </Button>
+                                        }
+                                    >
+                                        <AlertTitle>Unsaved calibration</AlertTitle>
+                                        Module calibration has been modified but has not been saved yet. It will be lost
+                                        when the ESP32 is restarted.
+                                    </Alert>
+                                ) : null}
+                                <Typography variant="h4" color="inherit">
+                                    Current state
+                                </Typography>
+                                <div style={{}}>
+                                    {
+                                        splitflapState.modules.map((module, i) => {
+                                            return (<SplitflapModuleDisplay
+                                                i={i}
+                                                module={module}
+                                                flapCharacterSet={flapCharacterSet}
+                                                charWidth={charWidth}
+                                                setSplitflapConfig={setSplitflapConfig}
+                                                increaseOffsetTenth={() => splitflap?.offsetIncrementTenth(i)}
+                                                increaseOffsetHalf={() => splitflap?.offsetIncrementHalf(i)}
+                                                increaseOffsetByTenths={(tenths) => splitflap?.offsetIncrementByTenths(i, tenths)}
+
+                                                goToFlap={(flapIndex) => {
+                                                    const update: (number | null)[] = Array(i + 1).fill(null)
+                                                    update[i] = flapIndex
+                                                    setSplitflapConfig((curConfig) => {
+                                                        return PB.SplitflapConfig.toObject(applySetFlaps(PB.SplitflapConfig.create(curConfig), update), {
+                                                            defaults: true,
+                                                        }) as NoUndefinedField<PB.ISplitflapConfig>
+                                                    })
+                                                }}
+                                                setOffsetToCurrentStep={
+                                                    () => {
+                                                        splitflap?.offsetSetToCurrentStep(i)
+                                                        setUnsavedCalibration(true);
+                                                    }
                                                 }
-                                            }
-                                        />)
-                                })
-                            }
-                            </div>
-                            <br />
-                            <Typography variant="h4" color="inherit">
-                                Input
-                            </Typography>
-                            <form onSubmit={(event) => {
+                                            />)
+                                        })
+                                    }
+                                </div>
+                                <br/>
+                                <Typography variant="h4" color="inherit">
+                                    Input
+                                </Typography>
+                                <form onSubmit={(event) => {
                                     event.preventDefault()
                                     updateSplitflap(inputValue.val)
                                     setInputValue({val: '', user: true})
@@ -298,7 +322,7 @@ export const App: React.FC<AppProps> = () => {
                                             left: 0,
                                             position: 'sticky'
                                         }}>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 maxLength={numModules}
                                                 onChange={handleInputChange}
@@ -308,7 +332,7 @@ export const App: React.FC<AppProps> = () => {
                                                 style={{
                                                     color: '#333',
                                                     caret: 'block',
-                                                    paddingLeft: `${charWidth*0.12}px`,
+                                                    paddingLeft: `${charWidth * 0.12}px`,
                                                     paddingTop: '20px',
                                                     paddingBottom: '20px',
                                                     letterSpacing: `${0.4 * charWidth}px`,
@@ -317,82 +341,87 @@ export const App: React.FC<AppProps> = () => {
                                                     backgroundImage: 'url("outline.svg")',
                                                     backgroundSize: `${charWidth}px`,
                                                     backgroundRepeat: 'repeat-x',
-                                                    backgroundPosition: `0px ${20 + charWidth*0.1}px`,
+                                                    backgroundPosition: `0px ${20 + charWidth * 0.1}px`,
                                                     fontSize: `${charWidth}px`,
                                                     fontFamily: 'Roboto Mono',
                                                     width: `${charWidth * numModules + 50}px`,
                                                 }}
-                                                />
+                                            />
                                         </div>
                                     </div>
-                            </form>
-                            <FormControlLabel control={<Checkbox checked={forceFullRotations} onChange={() => setForceFullRotations((cur) => !cur)} />} label="Force full rotations" />
-                            <p>
-                            <Link onClick={() => {
-                                setShowDebugInfo((cur) => !cur)
-                            }}>{ showDebugInfo ? <>Hide debug info</> : <>Show debug info</> }</Link>
-                            </p>
-                            { 
-                                showDebugInfo ? (
-                                    <>
-                                        <Link onClick={() => {
-                                            setLogDisplay({lastN: 20, title: "Recent logs", body:""})
-                                        }}>View logs</Link>
-                                        <pre>{ JSON.stringify(splitflapGeneralState, undefined, 4) }</pre>
-                                    </>
-                                ) : null
-                            }
-                            { logDisplay !== null ? (
-                                <Dialog open={true} onClose={() => setLogDisplay(null)}>
-                                    <DialogTitle>{logDisplay.title}</DialogTitle>
-                                    <DialogContent>
-                                    <DialogContentText>
-                                        {logDisplay.body}
-                                    </DialogContentText>
-                                    <Logs
-                                        logs={splitflapLogs} 
-                                        lastN={20}
-                                        after={logDisplay.after}
-                                        />
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button variant='contained' onClick={() => {
-                                        setLogDisplay(null)
-                                    }}>Done</Button>
-                                </DialogActions>
-                                </Dialog>
-                            ) : null }
-                        </>
-                    ) : navigator.serial ? (
-                        <>
-                        <Typography variant="h4" color="inherit">
-                            Welcome
-                        </Typography>
-                        <Typography variant="body1">
-                            <p>If you have a Splitflap Display built with the Chainlink electronics system and you have up-to-date firmware installed on it,
-                            you can connect it via USB and control it using this web page. This uses Web Serial to talk to the device without needing to
-                            install any software on your computer.</p>
-                        </Typography>
-                        <Button onClick={connectToSerial} variant="contained">
-                            Connect via Web Serial
-                        </Button>
-                        </>
-                    ) : (
-                        <Typography>
-                            Sorry, Web Serial API isn't available in your browser. Try the latest version of Chrome.
-                        </Typography>
-                    )}
+                                </form>
+                                <FormControlLabel control={<Checkbox checked={forceFullRotations}
+                                                                     onChange={() => setForceFullRotations((cur) => !cur)}/>}
+                                                  label="Force full rotations"/>
+                                <p>
+                                    <Link onClick={() => {
+                                        setShowDebugInfo((cur) => !cur)
+                                    }}>{showDebugInfo ? <>Hide debug info</> : <>Show debug info</>}</Link>
+                                </p>
+                                {
+                                    showDebugInfo ? (
+                                        <>
+                                            <Link onClick={() => {
+                                                setLogDisplay({lastN: 20, title: "Recent logs", body: ""})
+                                            }}>View logs</Link>
+                                            <pre>{JSON.stringify(splitflapGeneralState, undefined, 4)}</pre>
+                                        </>
+                                    ) : null
+                                }
+                                {logDisplay !== null ? (
+                                    <Dialog open={true} onClose={() => setLogDisplay(null)}>
+                                        <DialogTitle>{logDisplay.title}</DialogTitle>
+                                        <DialogContent>
+                                            <DialogContentText>
+                                                {logDisplay.body}
+                                            </DialogContentText>
+                                            <Logs
+                                                logs={splitflapLogs}
+                                                lastN={20}
+                                                after={logDisplay.after}
+                                            />
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button variant='contained' onClick={() => {
+                                                setLogDisplay(null)
+                                            }}>Done</Button>
+                                        </DialogActions>
+                                    </Dialog>
+                                ) : null}
+                            </>
+                        ) : navigator.serial ? (
+                            <>
+                                <Typography variant="h4" color="inherit">
+                                    Welcome
+                                </Typography>
+                                <Typography variant="body1">
+                                    <p>If you have a Splitflap Display built with the Chainlink electronics system and
+                                        you have up-to-date firmware installed on it,
+                                        you can connect it via USB and control it using this web page. This uses Web
+                                        Serial to talk to the device without needing to
+                                        install any software on your computer.</p>
+                                </Typography>
+                                <Button onClick={connectToSerial} variant="contained">
+                                    Connect via Web Serial
+                                </Button>
+                            </>
+                        ) : (
+                            <Typography>
+                                Sorry, Web Serial API isn't available in your browser. Try the latest version of Chrome.
+                            </Typography>
+                        )}
 
-                    { splitflap === null ?
-                        <Typography variant="body1">
-                            <p><b>Haven't built a display yet, or want to learn more?</b> Check out the <Link href="3d_viewer/">project landing page</Link> to see
-                            an interactive 3d model and read more about the project.</p>
-                        </Typography>
-                        :
-                        null
-                    }
+                        {splitflap === null ?
+                            <Typography variant="body1">
+                                <p><b>Haven't built a display yet, or want to learn more?</b> Check out the <Link
+                                    href="3d_viewer/">project landing page</Link> to see
+                                    an interactive 3d model and read more about the project.</p>
+                            </Typography>
+                            :
+                            null
+                        }
                     </CardContent>
-                    </Card>
+                </Card>
             </Container>
         </>
     )
@@ -406,6 +435,7 @@ type SplitflapModuleDisplayProps = {
     module: NoUndefinedField<PB.SplitflapState.IModuleState>,
     increaseOffsetTenth: () => void,
     increaseOffsetHalf: () => void,
+    increaseOffsetByTenths: (tenths: number) => void,
     goToFlap: (i: number) => void,
     setOffsetToCurrentStep: () => void,
 }
@@ -413,41 +443,228 @@ type SplitflapModuleDisplayProps = {
 enum CalibrationStep {
     FIND_FLAP_BOUNDARY = 0,
     ADJUST_WHOLE_FLAP_OFFSET = 1,
-    CALIBRATING = 2,
-    CONFIRM = 3,
+    ADVANCED_ADJUST_FLAP_OFFSET = 2,
+    VERIFY_HOME_ADVANCED = 3,
+    VERIFY_HOME = 4,
+    VERIFY_THIRD = 5,
+    VERIFY_TWO_THIRDS = 6,
+    FINAL_VERIFY = 7,
+    CALIBRATING = 8,
+    CONFIRM = 9,
 }
 
 const SplitflapModuleDisplay: React.FC<SplitflapModuleDisplayProps> = (props) => {
-    const {charWidth, i, flapCharacterSet, setSplitflapConfig, module, increaseOffsetTenth, increaseOffsetHalf, goToFlap, setOffsetToCurrentStep } = props
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const {
+        charWidth,
+        i,
+        flapCharacterSet,
+        setSplitflapConfig,
+        module,
+        increaseOffsetTenth,
+        increaseOffsetHalf,
+        increaseOffsetByTenths,
+        goToFlap,
+        setOffsetToCurrentStep
+    } = props;
+
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [calibrationStep, setCalibrationStep] = useState<CalibrationStep>(CalibrationStep.FIND_FLAP_BOUNDARY);
+    const [tenthsOffset, setTenthsOffset] = useState<number>(5); // Default to 5 (half step)
+    const [isAdvancedMode, setIsAdvancedMode] = useState<boolean>(false);
+    const [rumbleEnabled, setRumbleEnabled] = useState<boolean>(false);
+    const [isRumbling, setIsRumbling] = useState<boolean>(false);
+    const [currentRumbleIndex, setCurrentRumbleIndex] = useState<number>(0);
+
+    // Effect to handle continuous rumble
+    useEffect(() => {
+        if (!rumbleEnabled || !isRumbling) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setSplitflapConfig((curConfig) => {
+                const newModules = [...curConfig.modules];
+                // Find all alpha characters in the flap set
+                const alphaFlaps = flapCharacterSet
+                    .map((char, idx) => ({char, idx}))
+                    .filter(({char}) => char.match(/[A-Z]/));
+
+                if (alphaFlaps.length === 0) return curConfig;
+
+                // Update current position in the alpha sequence
+                setCurrentRumbleIndex((prev) => (prev + 1) % alphaFlaps.length);
+
+                // Make all other modules go to the next letter
+                for (let moduleIndex = 0; moduleIndex < curConfig.modules.length; moduleIndex++) {
+                    if (moduleIndex !== i) {
+                        newModules[moduleIndex] = {
+                            ...newModules[moduleIndex],
+                            targetFlapIndex: alphaFlaps[currentRumbleIndex].idx
+                        };
+                    }
+                }
+                return {modules: newModules};
+            });
+        }, 100); // Adjust speed as needed
+
+        return () => clearInterval(interval);
+    }, [rumbleEnabled, isRumbling, currentRumbleIndex, flapCharacterSet, i, setSplitflapConfig]);
+
+    // Start/stop rumbling based on calibration state
+    useEffect(() => {
+        setIsRumbling(rumbleEnabled && dialogOpen);
+    }, [rumbleEnabled, dialogOpen]);
+
+    const getThirdPosition = (flapSet: string[]) => Math.floor(flapSet.length / 3);
+    const getTwoThirdsPosition = (flapSet: string[]) => Math.floor(2 * flapSet.length / 3);
+
+    const handleVerificationSelection = (offset: -1 | 0 | 1) => {
+        if (offset === 0) {
+            // Correct flap, move to next step
+            console.log(calibrationStep)
+
+            switch (calibrationStep) {
+                case CalibrationStep.VERIFY_HOME_ADVANCED:
+                    setOffsetToCurrentStep();
+                    goToFlap(getThirdPosition(flapCharacterSet));
+                    setCalibrationStep(CalibrationStep.VERIFY_THIRD);
+                    break;
+                case CalibrationStep.VERIFY_THIRD:
+                    goToFlap(0);
+                    goToFlap(getTwoThirdsPosition(flapCharacterSet));
+                    setCalibrationStep(CalibrationStep.VERIFY_TWO_THIRDS);
+                    break;
+                case CalibrationStep.VERIFY_TWO_THIRDS:
+                    goToFlap(0);
+                    setCalibrationStep(CalibrationStep.FINAL_VERIFY);
+                    break;
+                case CalibrationStep.FINAL_VERIFY:
+                    setOffsetToCurrentStep();
+                    setCalibrationStep(CalibrationStep.CONFIRM);
+                    break;
+            }
+        } else {
+            // Wrong flap, adjust offset and restart
+            const adjustAmount = offset === -1 ? 1 : -1;
+            setTenthsOffset(prev => Math.max(0, Math.min(10, prev + adjustAmount)));
+            goToFlap(0);
+            setCalibrationStep(CalibrationStep.FIND_FLAP_BOUNDARY);
+        }
+    };
+
+    const renderFlapOptions = (expectedIndex: number) => {
+        const prevFlap = flapCharacterSet[(expectedIndex - 1 + flapCharacterSet.length) % flapCharacterSet.length];
+        const expectedFlap = flapCharacterSet[expectedIndex];
+        const nextFlap = flapCharacterSet[(expectedIndex + 1) % flapCharacterSet.length];
+        return (
+            <>
+                <Button variant="outlined" onClick={() => handleVerificationSelection(-1)} style={{opacity: 0.7}}>
+                    {renderFlapCharacter(prevFlap)}
+                </Button>
+                <Button variant="contained" onClick={() => handleVerificationSelection(0)}
+                        style={{transform: 'scale(1.2)'}}>
+                    {renderFlapCharacter(expectedFlap)}
+                </Button>
+                <Button variant="outlined" onClick={() => handleVerificationSelection(1)} style={{opacity: 0.7}}>
+                    {renderFlapCharacter(nextFlap)}
+                </Button>
+            </>
+        );
+    };
+    const handleTenthsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(event.target.value);
+        if (!isNaN(value) && value >= 0 && value <= 10) {
+            setTenthsOffset(value);
+        }
+    };
 
     const calibrationComponent: Record<CalibrationStep, React.FC<void>> = {
-        [CalibrationStep.FIND_FLAP_BOUNDARY]: () => 
+        [CalibrationStep.FIND_FLAP_BOUNDARY]: () =>
             <>
+                <DialogContent>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={isAdvancedMode}
+                                onChange={(e) => setIsAdvancedMode(e.target.checked)}
+                            />
+                        }
+                        label="Advanced Calibration Mode"
+                    />
+                    {isAdvancedMode && (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={rumbleEnabled}
+                                    onChange={(e) => setRumbleEnabled(e.target.checked)}
+                                />
+                            }
+                            label="Enable Rumble (Other modules will spin during calibration)"
+                        />
+                    )}
+                    <DialogContentText>
+                        Keep clicking this button until the flap flips...
+                    </DialogContentText>
+                    <Button variant='contained' onClick={() => {
+                        increaseOffsetTenth()
+                    }}>&gt;&gt;</Button>
+                    <br/>
+                    <DialogContentText>
+                        then click Continue.
+                    </DialogContentText>
+                    <br/>
+                    {isAdvancedMode && (
+                        <>
+                            <DialogContentText>
+                                Adjust offset after flip (default is 5 tenths for a half step):
+                            </DialogContentText>
+                            <TextField
+                                type="number"
+                                value={tenthsOffset}
+                                onChange={handleTenthsChange}
+                                inputProps={{min: 0, max: 10}}
+                                size="small"
+                                style={{marginTop: '8px', marginBottom: '8px'}}
+                            />
+                        </>
+                    )}
+                    <DialogContentText variant='caption'>
+                        (If you accidentally go too far, just keep clicking until the next flap flips)
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='outlined' onClick={() => {
+                        if (isAdvancedMode) {
+                            increaseOffsetByTenths(tenthsOffset);
+                            setCalibrationStep(CalibrationStep.ADVANCED_ADJUST_FLAP_OFFSET);
+                        } else {
+                            increaseOffsetHalf();
+                            setCalibrationStep(CalibrationStep.ADJUST_WHOLE_FLAP_OFFSET);
+                        }
+                    }}>Continue</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.ADVANCED_ADJUST_FLAP_OFFSET]: () => <>
             <DialogContent>
                 <DialogContentText>
-                    Keep clicking this button until the flap flips...
+                    Now click the flap that is currently showing
                 </DialogContentText>
-                <Button variant='contained' onClick={() => {
-                    increaseOffsetTenth()
-                }}>&gt;&gt;</Button>
-                <br />
-                <DialogContentText>
-                    then click Continue.
-                </DialogContentText>
-                <br />
-                <DialogContentText variant='caption'>
-                    (If you accidentally go too far, just keep clicking until the next flap flips)
-                </DialogContentText>
+                {
+                    Array.from(flapCharacterSet).map((f) => (
+                        <Button
+                            key={`button-${f}`}
+                            variant='outlined'
+                            onClick={() => {
+                                goToFlap((flapCharacterSet.length - flapCharacterSet.indexOf(f)) % flapCharacterSet.length)
+                                setCalibrationStep(CalibrationStep.VERIFY_HOME_ADVANCED);
+                            }}
+                        >
+                            {renderFlapCharacter(f)}
+                        </Button>
+                    ))
+                }
             </DialogContent>
-            <DialogActions>
-                <Button variant='outlined' onClick={() => {
-                    increaseOffsetHalf()
-                    setCalibrationStep(CalibrationStep.ADJUST_WHOLE_FLAP_OFFSET)
-                }}>Continue</Button>
-            </DialogActions>
-            </>,
+        </>,
         [CalibrationStep.ADJUST_WHOLE_FLAP_OFFSET]: () => <>
             <DialogContent>
                 <DialogContentText>
@@ -460,61 +677,152 @@ const SplitflapModuleDisplay: React.FC<SplitflapModuleDisplayProps> = (props) =>
                             variant='outlined'
                             onClick={() => {
                                 goToFlap((flapCharacterSet.length - flapCharacterSet.indexOf(f)) % flapCharacterSet.length)
-                                setCalibrationStep(CalibrationStep.CALIBRATING)
+                                setCalibrationStep(CalibrationStep.CALIBRATING);
                             }}
                         >
-                            { renderFlapCharacter(f) }
+                            {renderFlapCharacter(f)}
                         </Button>
                     ))
                 }
             </DialogContent>
         </>,
-        [CalibrationStep.CALIBRATING]: () => 
+        [CalibrationStep.VERIFY_HOME_ADVANCED]: () =>
             <>
-            {
-                module.moving ? (
-                    <DialogContent>
-                        <DialogContentText>
-                            Calibrating, please wait...
-                        </DialogContentText>
-                    </DialogContent>
+                <DialogContent>
+                    <DialogContentText>
+                        Verifying Home Position (Step 1 of 4)
+                        <br/>
+                        Select the flap character currently displayed:
+                    </DialogContentText>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1rem 0'}}>
+                        {renderFlapOptions(0)}
+                    </div>
+
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Quit</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.VERIFY_TWO_THIRDS]: () =>
+            <>
+                <DialogContent>
+                    <DialogContentText>
+                        Verifying 2/3 Position (Step 3 of 4)
+                        <br/>
+                        Select the flap character currently displayed:
+                    </DialogContentText>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1rem 0'}}>
+                        {renderFlapOptions(getTwoThirdsPosition(flapCharacterSet))}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Quit</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.FINAL_VERIFY]: () =>
+            <>
+                <DialogContent>
+                    <DialogContentText>
+                        Final Home Position Verification (Step 4 of 4)
+                        <br/>
+                        Select the flap character currently displayed:
+                    </DialogContentText>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1rem 0'}}>
+                        {renderFlapOptions(0)}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Quit</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.VERIFY_HOME]: () =>
+            <>
+                <DialogContent>
+                    <DialogContentText>
+                        Verifying Home Position (Step 1 of 4)
+                        <br/>
+                        Select the flap character currently displayed:
+                    </DialogContentText>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1rem 0'}}>
+                        {renderFlapOptions(0)}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Quit</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.VERIFY_THIRD]: () =>
+            <>
+                <DialogContent>
+                    <DialogContentText>
+                        Verifying 1/3 Position (Step 2 of 4)
+                        <br/>
+                        Select the flap character currently displayed:
+                    </DialogContentText>
+                    <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', margin: '1rem 0'}}>
+                        {renderFlapOptions(getThirdPosition(flapCharacterSet))}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Quit</Button>
+                </DialogActions>
+            </>,
+        [CalibrationStep.CALIBRATING]: () =>
+            <>
+                {
+                    module.moving ? (
+                        <DialogContent>
+                            <DialogContentText>
+                                Calibrating, please wait...
+                            </DialogContentText>
+                        </DialogContent>
                     ) : (
                         <>
-                    <DialogContent>
-                        <DialogContentText>
-                            Has the module calibrated to the home position?
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button variant='outlined' onClick={() => {
-                            goToFlap(0);
-                            setCalibrationStep(CalibrationStep.FIND_FLAP_BOUNDARY)
-                        }}>Retry</Button>
-                        <Button variant='contained' onClick={() => {
-                            setOffsetToCurrentStep()
-                            setDialogOpen(false)
-                        }}>Done</Button>
-                    </DialogActions>
-                    </>
+                            <DialogContent>
+                                <DialogContentText>
+                                    Has the module calibrated to the home position?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button variant='outlined' onClick={() => {
+                                    goToFlap(0);
+                                    setCalibrationStep(CalibrationStep.FIND_FLAP_BOUNDARY)
+                                }}>Retry</Button>
+                                <Button variant='contained' onClick={() => {
+                                    setOffsetToCurrentStep()
+                                    setDialogOpen(false)
+                                }}>Done</Button>
+                            </DialogActions>
+                        </>
                     )
                 }
             </>,
 
-        [CalibrationStep.CONFIRM]: () => 
+        [CalibrationStep.CONFIRM]: () =>
             <>
-            <DialogContent>
-                <DialogContentText>
-                    Calibration complete!
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button variant='outlined' onClick={() => {
-                    setCalibrationStep(CalibrationStep.FIND_FLAP_BOUNDARY)
-                }}>Retry</Button>
-                <Button variant='contained' onClick={() => {
-                    setDialogOpen(false)
-                }}>Done</Button>
-            </DialogActions>
+                <DialogContent>
+                    <DialogContentText>
+                        Calibration complete!
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='outlined' onClick={() => {
+                        setCalibrationStep(CalibrationStep.FIND_FLAP_BOUNDARY)
+                    }}>Retry</Button>
+                    <Button variant='contained' onClick={() => {
+                        setDialogOpen(false)
+                    }}>Done</Button>
+                </DialogActions>
             </>,
     }
 
@@ -562,26 +870,26 @@ const SplitflapModuleDisplay: React.FC<SplitflapModuleDisplayProps> = (props) =>
                         }).state}</div>
                         <div>Missed home: {module.countMissedHome}</div>
                         <div>Unexpected home: {module.countUnexpectedHome}</div>
-                        <br />
+                        <br/>
                         <div><b>Click to reset module</b></div>
                     </div>
                 }>
                     <div
                         style={{
                             width: '100%',
-                            paddingLeft: module.state === PB.SplitflapState.ModuleState.State.LOOK_FOR_HOME ? 0 : `${charWidth*0.12}px`,
+                            paddingLeft: module.state === PB.SplitflapState.ModuleState.State.LOOK_FOR_HOME ? 0 : `${charWidth * 0.12}px`,
                             backgroundColor: module.state === PB.SplitflapState.ModuleState.State.SENSOR_ERROR ? 'orange' : 'inherit',
                             minWidth: module.state,
                             textAlign: 'center',
                         }}
                     >{
                         module.state === PB.SplitflapState.ModuleState.State.NORMAL ?
-                        renderFlapCharacter(flapCharacterSet[module.flapIndex]) :
-                        module.state === PB.SplitflapState.ModuleState.State.LOOK_FOR_HOME ?
-                        <CircularProgress size={charWidth * 0.7} /> :
-                        module.state === PB.SplitflapState.ModuleState.State.SENSOR_ERROR ?
-                        <>&nbsp;</> :
-                        'x'
+                            renderFlapCharacter(flapCharacterSet[module.flapIndex]) :
+                            module.state === PB.SplitflapState.ModuleState.State.LOOK_FOR_HOME ?
+                                <CircularProgress size={charWidth * 0.7}/> :
+                                module.state === PB.SplitflapState.ModuleState.State.SENSOR_ERROR ?
+                                    <>&nbsp;</> :
+                                    'x'
                     }
                     </div>
                 </Tooltip>

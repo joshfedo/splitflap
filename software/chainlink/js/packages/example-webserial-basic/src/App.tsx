@@ -2,8 +2,7 @@ import React, {ReactNode, SyntheticEvent, useCallback, useEffect, useRef, useSta
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import {PB} from 'splitflapjs-proto'
-import {
-    Alert,
+import {    Alert,
     AlertTitle,
     AppBar,
     Button,
@@ -395,11 +394,11 @@ export const App: React.FC<AppProps> = () => {
                                     Welcome
                                 </Typography>
                                 <Typography variant="body1">
-                                    <p>If you have a Splitflap Display built with the Chainlink electronics system and
+                                    <span>If you have a Splitflap Display built with the Chainlink electronics system and
                                         you have up-to-date firmware installed on it,
                                         you can connect it via USB and control it using this web page. This uses Web
                                         Serial to talk to the device without needing to
-                                        install any software on your computer.</p>
+                                        install any software on your computer.</span>
                                 </Typography>
                                 <Button onClick={connectToSerial} variant="contained">
                                     Connect via Web Serial
@@ -413,9 +412,9 @@ export const App: React.FC<AppProps> = () => {
 
                         {splitflap === null ?
                             <Typography variant="body1">
-                                <p><b>Haven't built a display yet, or want to learn more?</b> Check out the <Link
+                                <span><b>Haven't built a display yet, or want to learn more?</b> Check out the <Link
                                     href="3d_viewer/">project landing page</Link> to see
-                                    an interactive 3d model and read more about the project.</p>
+                                    an interactive 3d model and read more about the project.</span>
                             </Typography>
                             :
                             null

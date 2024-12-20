@@ -85,6 +85,17 @@ export class SplitflapCore {
         this.sendModuleCommand(position, PB.SplitflapCommand.ModuleCommand.create({action: PB.SplitflapCommand.ModuleCommand.Action.INCREASE_OFFSET_HALF}))
     }
 
+    public offsetIncrementByTenths(position: number, tenths: number): void {
+        for (let i = 0; i < tenths; i++) {
+            this.sendModuleCommand(
+                position, 
+                PB.SplitflapCommand.ModuleCommand.create({
+                    action: PB.SplitflapCommand.ModuleCommand.Action.INCREASE_OFFSET_TENTH
+                })
+            );
+        }
+    }
+
     public offsetSetToCurrentStep(position: number): void {
         this.sendModuleCommand(position, PB.SplitflapCommand.ModuleCommand.create({action: PB.SplitflapCommand.ModuleCommand.Action.SET_OFFSET}))
     }

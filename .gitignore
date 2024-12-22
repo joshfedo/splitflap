@@ -22,3 +22,7 @@ sensor.xml
 *.hex
 
 .pio
+
+.idea/
+
+.vscode/

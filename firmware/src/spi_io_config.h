@@ -136,16 +136,23 @@ static const uint8_t MOTOR_OFFSET[] = {0, 0, 1, 2, 3, 3};
 #endif
 
 inline void initialize_modules() {
+  // Create a mapping array that follows the physical chainlink path
+  static const uint8_t chainlink_order[NUM_MODULES] = {
+    // Row 1: left to right
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    // Row 2: right to left
+    17, 16, 15, 14, 13, 12, 11, 10
+    
+  };
 
   for (uint8_t i = 0; i < NUM_MODULES; i++) {
-    // Create SplitflapModules in a statically allocated buffer using placement new
-#ifdef CHAINLINK
-    modules[i] = new (moduleBuffer[i]) SplitflapModule(motor_buffer[MOTOR_BUFFER_LENGTH - 1 - i/6*4 - MOTOR_OFFSET[i%6]], i % 2 == 0 ? 0 : 4, sensor_buffer[i/6], 1 << (i % 6));
-#else
-    modules[i] = new (moduleBuffer[i]) SplitflapModule(motor_buffer[MOTOR_BUFFER_LENGTH - 1 - i/2], i % 2 == 0 ? 0 : 4, sensor_buffer[i/4], 1 << (i % 4));
-#endif
+    // Use chainlink_order[i] to create modules in their physical wiring order
+    modules[chainlink_order[i]] = new (moduleBuffer[chainlink_order[i]]) SplitflapModule(
+      motor_buffer[MOTOR_BUFFER_LENGTH - 1 - i/6*4 - MOTOR_OFFSET[i%6]], 
+      i % 2 == 0 ? 0 : 4, 
+      sensor_buffer[i/6], 
+      1 << (i % 6));
   }
-  
   memset(motor_buffer, 0, MOTOR_BUFFER_LENGTH);
   memset(sensor_buffer, 0, SENSOR_BUFFER_LENGTH);
 

@@ -141,7 +141,8 @@ inline void initialize_modules() {
     // Row 1: left to right
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
     // Row 2: right to left
-    17, 16, 15, 14, 13, 12, 11, 10
+     19,18,17,16, 15, 14, 13, 12, 11, 10,
+     20,21,22,23
     
   };
 
